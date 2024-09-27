@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Gemini - Appwrite</title>
+    <style>
+      body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #1e1e2f;
+        color: #ffffff;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+      .chat-container {
+        width: 100%;
+        max-width: 600px;
+        background-color: #2c2c3e;
+        border-radius: 10px;
+        box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        max-height: 100%;
+      }
+      .chat-header {
+        background-color: #3b3b51;
+        padding: 20px;
+        text-align: center;
+        font-size: 1.5em;
+        font-weight: bold;
+        border-bottom: 1px solid #444;
+      }
+      .chat-box {
+        flex-grow: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+      }
+      .chat-message {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #4a4a66;
+      }
+      .chat-message.user {
+        align-self: flex-end;
+        background-color: #5865f2;
+      }
+      .chat-message.bot {
+        align-self: flex-start;
+        background-color: #4a4a66;
+      }
+      .chat-form {
+        display: flex;
+        border-top: 1px solid #444;
+      }
+      .chat-input {
+        flex-grow: 1;
+        padding: 15px;
+        border: none;
+        border-radius: 0;
+        background-color: #3b3b51;
+        color: #ffffff;
+        font-size: 1em;
+        outline: none;
+      }
+      .chat-input::placeholder {
+        color: #ccc;
+      }
+      .chat-submit {
+        background-color: #5865f2;
+        color: #ffffff;
+        border: none;
+        padding: 15px 20px;
+        cursor: pointer;
+        font-size: 1em;
+        transition: background-color 0.3s;
+      }
+      .chat-submit:hover {
+        background-color: #4854d8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <div class="chat-header">Chat with Gemini</div>
+      <div class="chat-box" id="chat-box">
+        <!-- Chat messages will be appended here -->
+      </div>
+      <form id="chat-form" class="chat-form">
+        <input
+          type="text"
+          id="prompt"
+          name="prompt"
+          class="chat-input"
+          placeholder="Type your message..."
+          required
+        />
+        <button type="submit" class="chat-submit">Send</button>
+      </form>
+    </div>
+
+    <script>
+      document
+        .getElementById('chat-form')
+        .addEventListener('submit', async function (event) {
+          event.preventDefault()
+          const prompt = document.getElementById('prompt').value
+          const chatBox = document.getElementById('chat-box')
+
+          /* Append the user's message */
+          const userMessage = document.createElement('div')
+          userMessage.classList.add('chat-message', 'user')
+          userMessage.textContent = prompt
+          chatBox.appendChild(userMessage)
+
+          /* Scroll to the bottom of the chat */
+          chatBox.scrollTop = chatBox.scrollHeight
+
+          /* Clear the input field */
+          document.getElementById('prompt').value = ''
+
+          /* Display 'Processing...' in bot message */
+          const botMessage = document.createElement('div')
+          botMessage.classList.add('chat-message', 'bot')
+          botMessage.textContent = 'Processing...'
+          chatBox.appendChild(botMessage)
+
+          /* Scroll to the bottom of the chat */
+          chatBox.scrollTop = chatBox.scrollHeight
+
+          try {
+            const response = await fetch('/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ prompt: prompt }),
+            })
+
+            const data = await response.json()
+
+            if (data.ok) botMessage.innerHTML = data.output
+            else botMessage.textContent = 'Error: ' + data.error
+          } catch (error) {
+            botMessage.textContent = 'Error: ' + error.message
+          }
+
+          /* Scroll to the bottom of the chat */
+          chatBox.scrollTop = chatBox.scrollHeight
+        })
+    </script>
+  </body>
+</html>
